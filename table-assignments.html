@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Table Assignments</title>
+<style>
+:root{--bg:#faf8f4;--card:#fff;--text:#2a2622;--muted:#756d63;--line:#e6e0d6;--accent:#8a5a1f;--hl:#fff1c2;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1c1a17;--card:#27241f;--text:#f0ebe3;--muted:#a39a8d;--line:#3a352e;--accent:#e0b46c;--hl:#5a4710;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1c1a17;--card:#27241f;--text:#f0ebe3;--muted:#a39a8d;--line:#3a352e;--accent:#e0b46c;--hl:#5a4710;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Georgia,'Times New Roman',serif}
+main{max-width:1000px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:1.7rem;margin:8px 0 4px;text-align:center}
+.sub{text-align:center;color:var(--muted);margin:0 0 16px;font-family:system-ui,sans-serif;font-size:.9rem}
+.search{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);padding:8px 0;z-index:5}
+input{width:100%;padding:14px 16px;font-size:1rem;border:1.5px solid var(--line);border-radius:12px;background:var(--card);color:var(--text);font-family:system-ui,sans-serif}
+input:focus{outline:2px solid var(--accent);border-color:var(--accent)}
+#result{margin:8px 0 0;font-family:system-ui,sans-serif;font-size:.95rem;color:var(--muted);min-height:1.4em}
+#result b{color:var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.card h2{margin:0 0 8px;font-size:1.1rem;color:var(--accent);border-bottom:1px solid var(--line);padding-bottom:6px}
+.card h2 small{color:var(--muted);font-weight:normal;font-size:.8rem}
+ul{list-style:none;margin:0;padding:0;font-family:system-ui,sans-serif;font-size:.95rem}
+li{padding:3px 4px;border-radius:4px}
+li.hit{background:var(--hl);font-weight:600}
+.card.dim{display:none}
+.note{margin-top:20px;color:var(--muted);font-size:.8rem;font-family:system-ui,sans-serif;text-align:center}
+</style>
+</head>
+<body>
+<main>
+<h1>Table Assignments</h1>
+<p class="sub">Find your name to see your table</p>
+<div class="search">
+<input id="q" type="search" placeholder="Search your name…" autocomplete="off" aria-label="Search guest name">
+<div id="result"></div>
+</div>
+<div class="grid" id="grid"></div>
+<p class="note">Names cut off in the source sheet are marked with “…”.</p>
+</main>
+<script>
+const T={
+3:["Suella Ngo","Edi Umondak","Olesya Shapoval","Mervielle Goebel","Jason Goebel","Nina Tazi","Bertrand Fuango","Iris Fuango"],
+4:["Nina Engeh","Linda Nangah","Lea Nangah","Vera Etoni Nkafu Forbin Ndumb…","Ruben Ndumbe","Larry Ndango","Clarice Ndango","Nikky (Porche Avenue)"],
+12:["Pius Awasom","Florence Awasom","Susana Neh","Juliette Fru","Lucien Fru","Simon Fru","Yolande Fru","Curtis Che","Queen Violet Che"],
+13:["Victorine Ndikum","Nicholas Asangwe","Franklin Musongwe","Prisca Musongwe","Kenneth Ndikum","Priscilla E. Atu-tetuh","Priscilla Ndikum","Uba Nasiru"],
+14:["Sally Arrey","Geraldine Ndikum","Peter Ndikum","Florence Angu","Sally Kangkolo","Usula Fombon","Valerie Leb Fombon","Peggy Ighaloo"],
+19:["Babila Nketi","Emily Vasko","Betina TitaJani","Ba TitaJani","Serge Kamgang","Gwen Atabong","Judith Titalanga","Marie Akaya"],
+20:["Sama Awah","Loveline Awah","Valeria Awah","Anthony Ngafor","Vera Awah-Mwaka","Emmanuel Mwaka","Mercy Awah","Eugene Ngang"],
+21:["Damian Mbah","Honorine Mbah","Tom Mbah","Eddo Ndangam","Clarence Ndangam","Helen Ndangam (Jr)","Abong Ngranui","Stella Luma"],
+22:["Angeline Fombe","George Fombe","Lay Fossem","Derrick Fossem","Bilola Fogam","Franklin Fogam","Evelyn Eyong","Elias Eyong"],
+25:["Pheasan Ngang","Julien Doh","Claudine Mbah","Stephen Doh","Ernestine Ndangam","Ernestine - Rachel Ndangam","Emmanuel Babila","Victor Gang"],
+26:["Fausta Elad","Asanga Julius","Caroline Asanga","Melvis Tabe","Walter","Nene Gana","Valentine Gana","Elvis Ndamukong"],
+27:["Pascaline Leina Titanji","Samkeah Titanji","Peter Fokum","Elise Penvadga Fokum","Sama Esau Jangha","Nicoline Jangha","Denis Gwandima","Tayong"],
+28:["Ma Evelyn F…","Ni Babila Fo…","Ben Jangha","Gladys Jang…","Gilbert Doh","Annonciata E…","Goddy Gwaab…","Emma Gwaab…"]
+};
+const L={14:"KC Mix",27:"Ndâ Dgwè"};
+const grid=document.getElementById('grid'),q=document.getElementById('q'),res=document.getElementById('result');
+const nums=Object.keys(T).map(Number).sort((a,b)=>a-b);
+grid.innerHTML=nums.map(n=>`<section class="card" data-t="${n}"><h2>Table ${n}${L[n]?` <small>(${L[n]})</small>`:''}</h2><ul>${T[n].map(p=>`<li data-n="${p.toLowerCase()}">${p}</li>`).join('')}</ul></section>`).join('');
+const esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+q.addEventListener('input',()=>{
+ const v=q.value.trim().toLowerCase();let found=[];
+ document.querySelectorAll('.card').forEach(c=>{
+  let any=false;
+  c.querySelectorAll('li').forEach(li=>{
+   const h=v&&li.dataset.n.includes(v);li.classList.toggle('hit',!!h);
+   if(h){any=true;found.push([li.textContent,c.dataset.t]);}
+  });
+  c.classList.toggle('dim',!!v&&!any);
+ });
+ if(!v){res.textContent='';return;}
+ if(!found.length){res.textContent='No match. Try a different spelling or just a last name.';return;}
+ res.innerHTML=found.slice(0,6).map(([n,t])=>`${esc(n)} → <b>Table ${t}</b>`).join('<br>')+(found.length>6?`<br>+${found.length-6} more`:'');
+});
+</script>
+</body>
+</html>
